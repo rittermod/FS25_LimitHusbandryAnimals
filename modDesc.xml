@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<modDesc descVersion="100">
+    <author>Ritter</author>
+    <version>0.1.0.0</version>
+    <title>
+        <en>Limit Husbandry Animals [ALPHA]</en>
+    </title>
+    <description>
+        <en><![CDATA[
+Limit the maximum number of animals in husbandry pens, pastures, and buildings.
+
+Full multiplayer support with permission system - admins can modify any pen, farm managers can modify their farm's pens.
+
+ALPHA RELEASE - Console commands only. GUI dialog coming in future update.
+
+Features:
+- Set custom animal limits per pen (cannot exceed original capacity)
+- Limits persist across save/load
+- Full multiplayer support with permission system
+
+Usage:
+1. Walk to any animal loading trigger and press L to view current limits
+2. Use console commands to change limits:
+   - lhaList: Show all husbandries with limits
+   - lhaSet <index> <limit>: Set a custom limit
+   - lhaReset <index>: Reset to original capacity
+
+Changelog:
+0.1.0.0:
+- First functional release
+- Console commands for limit management
+- Keybind (L) shows pen info at animal triggers
+- Savegame persistence
+- Full multiplayer support
+        ]]></en>
+    </description>
+
+    <iconFilename>icon_LimitHusbandryAnimals.dds</iconFilename>
+    <multiplayer supported="true"/>
+
+
+    <extraSourceFiles>
+        <sourceFile filename="scripts/main.lua"/>
+    </extraSourceFiles>
+
+    <l10n filenamePrefix="languages/l10n"/>
+
+    <actions>
+        <action name="RM_LIMIT_HUSBANDRY_ANIMALS"/>
+    </actions>
+
+    <inputBinding>
+        <actionBinding action="RM_LIMIT_HUSBANDRY_ANIMALS">
+            <binding device="KB_MOUSE_DEFAULT" input="KEY_l"/>
+        </actionBinding>
+    </inputBinding>
+</modDesc>

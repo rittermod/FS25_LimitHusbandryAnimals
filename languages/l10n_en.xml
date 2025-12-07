@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<l10n>
+    <texts>
+        <!-- Input action display name -->
+        <text name="input_RM_LIMIT_HUSBANDRY_ANIMALS" text="Set Animal Limit"/>
+
+        <!-- Activatable action text -->
+        <text name="rm_lha_action_setLimit" text="Set Animal Limit"/>
+
+        <!-- Error messages -->
+        <text name="rm_lha_error_notAvailable" text="Action not available"/>
+        <text name="rm_lha_error_notOwner" text="You don't own this husbandry"/>
+        <text name="rm_lha_error_notFound" text="Husbandry not found"/>
+        <text name="rm_lha_error_notManager" text="You must be farm manager to change limits"/>
+        <text name="rm_lha_error_invalidLimit" text="Invalid limit value"/>
+        <text name="rm_lha_error_unknown" text="An unknown error occurred"/>
+
+        <!-- MP success message -->
+        <text name="rm_lha_mp_success" text="Limit for %s set to %d"/>
+
+        <!-- Limit dialog -->
+        <text name="rm_lha_dialog_currentAnimals" text="Current Animals: %d"/>
+        <text name="rm_lha_dialog_currentLimit" text="Current Limit: %d"/>
+        <text name="rm_lha_dialog_originalCapacity" text="Original Capacity: %d"/>
+        <text name="rm_lha_dialog_customMarker" text=" [CUSTOM]"/>
+    </texts>
+</l10n>
