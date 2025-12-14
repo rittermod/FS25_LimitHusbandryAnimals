@@ -1,38 +1,44 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="100">
     <author>Ritter</author>
-    <version>0.1.0.0</version>
+    <version>0.2.0.0</version>
     <title>
-        <en>Limit Husbandry Animals [ALPHA]</en>
+        <en>Limit Husbandry Animals</en>
     </title>
     <description>
         <en><![CDATA[
 Limit the maximum number of animals in husbandry pens, pastures, and buildings.
 
-Full multiplayer support with permission system - admins can modify any pen, farm managers can modify their farm's pens.
-
-ALPHA RELEASE - Console commands only. GUI dialog coming in future update.
+Multiplayer support with permission system - admins can modify any pen, farm managers can modify their farm's pens.
 
 Features:
-- Set custom animal limits per pen (cannot exceed original capacity)
+- Easy limit dialog: Press L at any animal trigger to set limits
+- Direct number input with automatic validation
 - Limits persist across save/load
-- Full multiplayer support with permission system
+- Multiplayer support with permission system
+- Console commands available for advanced users
 
 Usage:
-1. Walk to any animal loading trigger and press L to view current limits
-2. Use console commands to change limits:
-   - lhaList: Show all husbandries with limits
-   - lhaSet <index> <limit>: Set a custom limit
-   - lhaReset <index>: Reset to original capacity
+1. Walk to any animal loading trigger and press L
+2. Enter your desired limit in the dialog (min/max bounds shown)
+3. Press OK to apply
+
+Console Commands (advanced):
+- lhaList: Show all husbandries with limits
+- lhaSet <index> <limit>: Set a custom limit
+- lhaReset <index>: Reset to original capacity
 
 Changelog:
+0.2.0.0:
+- Added GUI dialog for setting limits
+- Direct number input with validation
+
 0.1.0.0:
 - First functional release
 - Console commands for limit management
-- Keybind (L) shows pen info at animal triggers
 - Savegame persistence
 - Full multiplayer support
-        ]]></en>
+        ]]>        </en>
     </description>
 
     <iconFilename>icon_LimitHusbandryAnimals.dds</iconFilename>

@@ -19,9 +19,7 @@
         <text name="rm_lha_mp_success" text="Limit for %s set to %d"/>
 
         <!-- Limit dialog -->
-        <text name="rm_lha_dialog_currentAnimals" text="Current Animals: %d"/>
-        <text name="rm_lha_dialog_currentLimit" text="Current Limit: %d"/>
-        <text name="rm_lha_dialog_originalCapacity" text="Original Capacity: %d"/>
-        <text name="rm_lha_dialog_customMarker" text=" [CUSTOM]"/>
+        <text name="rm_lha_dialog_title" text="Set Animal Limit"/>
+        <text name="rm_lha_dialog_bounds" text="Min: %d / Max: %d"/>
     </texts>
 </l10n>

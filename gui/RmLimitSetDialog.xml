@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<GUI onOpen="onOpen" onClose="onClose" onCreate="onCreate">
+    <GuiElement profile="newLayer" />
+    <Bitmap profile="dialogFullscreenBg" id="dialogBg" />
+
+    <GuiElement profile="rmLimitDialogBg" id="dialogElement">
+        <ThreePartBitmap profile="fs25_dialogBgMiddleSmall" />
+        <ThreePartBitmap profile="fs25_dialogBgTopSmall" />
+        <ThreePartBitmap profile="fs25_dialogBgBottom" />
+        <GuiElement profile="rmLimitContentContainer">
+
+            <!-- Header - dialog function -->
+            <Text profile="rmLimitHeader" text="$l10n_rm_lha_dialog_title" />
+
+            <!-- Husbandry name -->
+            <Text profile="rmLimitHusbandryName" text="" id="dialogTitleElement" />
+
+            <!-- Info text (min/max bounds) -->
+            <Text profile="rmLimitInfo" text="" id="infoTextElement" />
+
+            <!-- Text input field for direct entry -->
+            <TextInput profile="rmLimitTextInput" id="limitInput" onEnterPressed="onEnterPressed" onTextChanged="onTextChanged" enterWhenClickOutside="false" focusId="LIMIT_INPUT" focusChangeDown="OK">
+                <ThreePartBitmap profile="fs25_textInputBg" absoluteSizeOffset="0px 0px"/>
+                <Bitmap profile="fs25_textInputIconBox" position="0px 0px">
+                    <Bitmap profile="fs25_textInputIcon" />
+                </Bitmap>
+            </TextInput>
+
+        </GuiElement>
+
+        <BoxLayout profile="fs25_dialogButtonBox">
+            <Button profile="buttonOK" text="$l10n_button_ok" onClick="onClickOK" id="okButton" focusId="OK" focusChangeUp="LIMIT_INPUT" focusChangeRight="CANCEL" />
+            <Bitmap profile="fs25_dialogButtonBoxSeparator" />
+            <Button profile="buttonBack" text="$l10n_button_cancel" onClick="onClickCancel" id="cancelButton" focusId="CANCEL" focusChangeUp="LIMIT_INPUT" focusChangeLeft="OK" />
+        </BoxLayout>
+    </GuiElement>
+
+    <GUIProfiles>
+        <!-- Dialog background -->
+        <Profile name="rmLimitDialogBg" extends="yesNoDialogBg">
+            <size value="560px 400px" />
+            <height value="280px" />
+        </Profile>
+
+        <!-- Content container -->
+        <Profile name="rmLimitContentContainer" extends="emptyPanel" with="anchorStretchingYStretchingX pivotTopCenter">
+            <absoluteSizeOffset value="21px 50px" />
+            <position value="4px 0px" />
+        </Profile>
+
+        <!-- Header - dialog function -->
+        <Profile name="rmLimitHeader" extends="dialogText" with="anchorTopCenter">
+            <position value="0px -40px"/>
+            <textColor value="$preset_colorWhite"/>
+            <textBold value="true"/>
+            <textSize value="24px"/>
+        </Profile>
+
+        <!-- Husbandry name -->
+        <Profile name="rmLimitHusbandryName" extends="dialogText" with="anchorTopCenter">
+            <position value="0px -70px"/>
+            <textSize value="20px"/>
+            <textMaxWidth value="400px"/>
+        </Profile>
+
+        <!-- Info text showing min/max -->
+        <Profile name="rmLimitInfo" extends="dialogText" with="anchorTopCenter">
+            <position value="0px -100px"/>
+            <size value="400px 25px"/>
+            <textSize value="16px"/>
+        </Profile>
+
+        <!-- Text input field -->
+        <Profile name="rmLimitTextInput" extends="fs25_textInput" with="anchorTopCenter">
+            <position value="0px -135px"/>
+            <size value="300px 40px"/>
+            <maxCharacters value="4"/>
+            <textAlignment value="center"/>
+            <textSize value="22px"/>
+        </Profile>
+    </GUIProfiles>
+</GUI>

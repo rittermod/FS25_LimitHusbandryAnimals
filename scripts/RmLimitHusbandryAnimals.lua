@@ -73,6 +73,9 @@ function RmLimitHusbandryAnimals.onMissionStarted()
 
     RmLogging.logInfo("Mission started, initializing...")
 
+    -- Register GUI dialog
+    RmLimitSetDialog.register()
+
     -- NOTE: Original limits are captured via onHusbandryAnimalsCreated in the specialization
     -- (RmPlaceableHusbandryLimitAnimals.lua). This event fires when nav mesh is created/recreated.
     -- For fenced pastures, it fires MULTIPLE times - we always update originalLimit so the last
@@ -561,8 +564,6 @@ function RmLimitHusbandryAnimals:showLimitDialog(husbandry)
         return
     end
 
-    local uniqueId = husbandry.uniqueId
-    local name = husbandry:getName() or "Unknown"
     local spec = husbandry.spec_husbandryAnimals
     local currentAnimals = husbandry:getNumOfAnimals() or 0
     local currentMax = spec.maxNumAnimals or 0
@@ -570,24 +571,8 @@ function RmLimitHusbandryAnimals:showLimitDialog(husbandry)
     -- Ensure original limit is captured (lazy capture for correct fence capacity)
     local originalMax = self:ensureOriginalLimit(husbandry)
 
-    local index = self:getHusbandryIndex(husbandry) or "?"
-
-    local isCustom = self.customLimits[uniqueId] ~= nil
-    local customText = isCustom and g_i18n:getText("rm_lha_dialog_customMarker") or ""
-
-    -- Build info text (console hints use hardcoded English)
-    local text = string.format(
-        "%s%s\n\n%s\n%s\n%s\n\n%s\n%s\n%s",
-        name, customText,
-        string.format(g_i18n:getText("rm_lha_dialog_currentAnimals"), currentAnimals),
-        string.format(g_i18n:getText("rm_lha_dialog_currentLimit"), currentMax),
-        string.format(g_i18n:getText("rm_lha_dialog_originalCapacity"), originalMax),
-        "To change limit, use console:",
-        string.format("  lhaSet %d <new_limit>", index),
-        string.format("  lhaReset %d", index)
-    )
-
-    InfoDialog.show(text)
+    -- Show the GUI dialog
+    RmLimitSetDialog.show(husbandry, currentMax, originalMax, currentAnimals)
 end
 
 -- Hook onStartMission - fires after placeables are populated

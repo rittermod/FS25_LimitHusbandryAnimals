@@ -1,18 +1,21 @@
-# Limit Husbandry Animals [ALPHA]
+# Limit Husbandry Animals [BETA]
 
-Limit the maximum number of animals in husbandry pens, pastures, and buildings. Useful for keeping your farm manageable or creating gameplay challenges with restricted animal capacity.
+Limit the maximum number of animals in husbandry pens, pastures, and buildings. Set custom limits through an easy-to-use dialog or console commands.
 
-Full multiplayer support with permission system - admins can modify any pen, farm managers can modify their farm's pens.
 
-> **ALPHA RELEASE** - Core functionality complete. Limit changes via console commands only. GUI dialog coming in future update.
+Multiplayer support with permission system - admins can modify any pen, farm managers can modify their farm's pens.
+
+> **BETA RELEASE** - GUI dialog for setting limits. Console commands available for advanced users.
 
 ## Features
 
+- **Easy Limit Dialog:** Press L at any animal trigger to open the limit setter
+- **Direct Input:** Type your desired limit - bounds shown, validation automatic
 - **Custom Limits:** Set maximum animal counts per pen/building/pasture
 - **Validation:** Cannot exceed original capacity or go below current animals
 - **Savegame Persistence:** Limits saved per-savegame
 - **Multiplayer Support:** Server validation, client sync, permission system
-- **Console Commands:** lhaList, lhaSet, lhaReset for limit management
+- **Console Commands:** lhaList, lhaSet, lhaReset for advanced users
 
 ## Installation
 
@@ -26,10 +29,13 @@ Full multiplayer support with permission system - admins can modify any pen, far
 ## Usage
 
 1. Walk to any animal loading trigger (pen, pasture, building)
-2. Press **L** to view current limits (current animals, current limit, original capacity)
-3. Use console commands to change limits:
+2. Press **L** to open the limit dialog
+3. Enter your desired limit (min/max bounds shown)
+4. Press OK to apply, Cancel to discard
 
-### Console Commands
+### Advanced: Console Commands
+
+For changes without the dialog:
 
 | Command | Description | Example |
 |---------|-------------|---------|
@@ -47,6 +53,13 @@ Full multiplayer support with permission system - admins can modify any pen, far
 
 
 ## Changelog
+
+### 0.2.0.0
+- Added GUI dialog for setting limits (press L at animal trigger)
+- Added direct number input with automatic validation
+- Added gamepad navigation support for the dialog
+- Changed keybind behavior: L now opens dialog instead of showing info text
+- Console commands remain available for advanced users
 
 ### 0.1.0.0
 - First functional release

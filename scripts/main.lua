@@ -8,6 +8,7 @@ local modDirectory = g_currentModDirectory
 source(modDirectory .. "scripts/RmLogging.lua")
 source(modDirectory .. "scripts/RmLimitHusbandryAnimals.lua")
 source(modDirectory .. "scripts/events/RmLimitHusbandryAnimalsSyncEvent.lua")
+source(modDirectory .. "scripts/gui/RmLimitSetDialog.lua")
 
 
 --- Validate and inject specialization into husbandry placeable types
