@@ -23,7 +23,7 @@ local CONSOLE_ERRORS = {
 
 -- Initialize logging (prefix updated in setLoggingContext after mission starts)
 RmLogging.setLogPrefix("[RmLimitHusbandryAnimals]")
-RmLogging.setLogLevel(RmLogging.LOG_LEVEL.DEBUG)
+--RmLogging.setLogLevel(RmLogging.LOG_LEVEL.DEBUG)
 
 --- Detects server/client context and updates logging prefix accordingly
 --- Called during initialization to distinguish between dedicated server, listen server, and client

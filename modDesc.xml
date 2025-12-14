@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="100">
     <author>Ritter</author>
-    <version>0.2.0.0</version>
+    <version>0.2.1.0</version>
     <title>
         <en>Limit Husbandry Animals</en>
     </title>
@@ -9,7 +9,7 @@
         <en><![CDATA[
 Limit the maximum number of animals in husbandry pens, pastures, and buildings.
 
-Multiplayer support with permission system - admins can modify any pen, farm managers can modify their farm's pens.
+Multiplayer support with permission system - admins can modify any pen (use console for other farms), farm managers can modify their farm's pens.
 
 Features:
 - Easy limit dialog: Press L at any animal trigger to set limits
@@ -29,6 +29,9 @@ Console Commands (advanced):
 - lhaReset <index>: Reset to original capacity
 
 Changelog:
+0.2.1.0:
+- Clarified multiplayer admin permissions (use console for cross-farm modifications)
+
 0.2.0.0:
 - Added GUI dialog for setting limits
 - Direct number input with validation

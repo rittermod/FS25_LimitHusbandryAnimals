@@ -47,12 +47,17 @@ For changes without the dialog:
 
 | Role | Permission |
 |------|------------|
-| **Admins** | Can modify any husbandry on any farm |
+| **Admins** | Can modify any husbandry on any farm* |
 | **Farm Managers** | Can modify husbandries owned by their farm |
 | **Standard Players** | View only (no modification) |
 
+*Game restricts trigger visibility by farm - use console commands to modify other farms' husbandries.
+
 
 ## Changelog
+
+### 0.2.1.0
+- Clarified multiplayer admin permissions (use console for cross-farm modifications)
 
 ### 0.2.0.0
 - Added GUI dialog for setting limits (press L at animal trigger)
