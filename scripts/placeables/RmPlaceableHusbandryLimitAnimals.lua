@@ -21,22 +21,86 @@ function RmPlaceableHusbandryLimitAnimals.registerEventListeners(placeableType)
     SpecializationUtil.registerEventListener(placeableType, "onWriteStream", RmPlaceableHusbandryLimitAnimals)
 end
 
---- Called after placeable loads - replace activatable to add our keybind
+--- Called after placeable loads - patch activatable to add our keybind
+--- Uses non-destructive method wrapping to preserve compatibility with other mods
+--- (e.g., MoveHusbandryAnimals) that also extend the activatable
 function RmPlaceableHusbandryLimitAnimals:onPostLoad(savegame)
     local husbandryAnimalsSpec = self.spec_husbandryAnimals
     local animalLoadingTrigger = husbandryAnimalsSpec.animalLoadingTrigger
 
-    -- Replace activatable to add our input binding (only for non-dealer husbandries)
+    -- Patch activatable to add our input binding (only for non-dealer husbandries)
     if animalLoadingTrigger ~= nil and animalLoadingTrigger.activatable ~= nil then
         if not animalLoadingTrigger.isDealer and animalLoadingTrigger.husbandry == self then
-            g_currentMission.activatableObjectsSystem:removeActivatable(animalLoadingTrigger.activatable)
+            local activatable = animalLoadingTrigger.activatable
 
-            animalLoadingTrigger.activatable = RmAnimalLoadingTriggerLimitActivatable.new(animalLoadingTrigger)
-            self[RmPlaceableHusbandryLimitAnimals.SPEC_TABLE_NAME].activatableAdded = true
+            -- Store original methods (may be nil for base class, defined for custom activatables like MoveHusbandryAnimals)
+            local origRegister = activatable.registerCustomInput
+            local origRemove = activatable.removeCustomInput
 
-            RmLogging.logDebug("Replaced activatable for %s", self:getName())
+            -- Wrap registerCustomInput to add our keybinding while preserving other mods' keybindings
+            activatable.registerCustomInput = function(act, inputContext)
+                -- Call original first (preserves other mods' keybindings)
+                if origRegister then
+                    origRegister(act, inputContext)
+                end
+                -- Add our limit keybinding (player on foot only)
+                if inputContext == PlayerInputComponent.INPUT_CONTEXT_NAME then
+                    local _, actionEventId = g_inputBinding:registerActionEvent(
+                        InputAction.RM_LIMIT_HUSBANDRY_ANIMALS,
+                        act,
+                        RmPlaceableHusbandryLimitAnimals.actionEventLimitAnimals,
+                        false, true, false, true)
+                    g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("rm_lha_action_setLimit"))
+                    g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_HIGH)
+                    g_inputBinding:setActionEventTextVisibility(actionEventId, true)
+                    act.rmLimitAnimalsActionEventId = actionEventId
+                end
+            end
+
+            -- Wrap removeCustomInput to clean up our keybinding
+            activatable.removeCustomInput = function(act, inputContext)
+                -- Call original first
+                if origRemove then
+                    origRemove(act, inputContext)
+                end
+                -- Remove our keybinding
+                if act.rmLimitAnimalsActionEventId then
+                    g_inputBinding:removeActionEvent(act.rmLimitAnimalsActionEventId)
+                    act.rmLimitAnimalsActionEventId = nil
+                end
+            end
+
+            -- Store reference to husbandry for action handler
+            activatable.rmHusbandry = self
+
+            self[RmPlaceableHusbandryLimitAnimals.SPEC_TABLE_NAME].activatablePatched = true
+            RmLogging.logDebug("Patched activatable for %s (preserves other mods)", self:getName())
         end
     end
+end
+
+--- Handle limit action event (static function called with activatable as first arg)
+---@param activatable table The activatable instance
+---@param actionName string Action name
+---@param inputValue number Input value
+---@param callbackState any Callback state
+---@param isAnalog boolean Whether input is analog
+function RmPlaceableHusbandryLimitAnimals.actionEventLimitAnimals(activatable, actionName, inputValue, callbackState, isAnalog)
+    local husbandry = activatable.rmHusbandry
+    if husbandry == nil or activatable.owner == nil then
+        InfoDialog.show(g_i18n:getText("rm_lha_error_notAvailable"))
+        return
+    end
+
+    -- Check permission (handles both SP and MP cases)
+    local canModify, errorKey = RmLimitHusbandryAnimals:canModifyLimit(husbandry)
+    if not canModify then
+        InfoDialog.show(g_i18n:getText(errorKey))
+        return
+    end
+
+    -- Show limit dialog
+    RmLimitHusbandryAnimals:showLimitDialog(husbandry)
 end
 
 --- Called when husbandry animals system is created (fires after navigation mesh is created/recreated)
@@ -144,82 +208,4 @@ function RmPlaceableHusbandryLimitAnimals:onReadStream(streamId, connection)
             RmLogging.logDebug("ReadStream: Applied custom limit %d for %s", customLimit, self:getName())
         end
     end
-end
-
--- Custom activatable that adds our limit keybind
-RmAnimalLoadingTriggerLimitActivatable = {}
-RmAnimalLoadingTriggerLimitActivatable.MOD_NAME = g_currentModName
-
-local RmAnimalLoadingTriggerLimitActivatable_mt = Class(RmAnimalLoadingTriggerLimitActivatable,
-    AnimalLoadingTriggerActivatable)
-
---- Create new activatable
-function RmAnimalLoadingTriggerLimitActivatable.new(owningTrigger)
-    local self = setmetatable({}, RmAnimalLoadingTriggerLimitActivatable_mt)
-
-    self.owner = owningTrigger
-    self.activateText = g_i18n:getText("animals_openAnimalScreen", owningTrigger.customEnvironment)
-
-    self.activateActionEventId = nil
-    self.limitAnimalsActionEventId = nil
-
-    return self
-end
-
---- Register input actions when player enters trigger
-function RmAnimalLoadingTriggerLimitActivatable:registerCustomInput(inputContext)
-    -- Register original activate action (opens animal screen)
-    local _, actionEventId = g_inputBinding:registerActionEvent(InputAction.ACTIVATE_OBJECT, self,
-        self.actionEventActivate, false, true, false, true)
-
-    g_inputBinding:setActionEventText(actionEventId, self.activateText)
-    g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_HIGH)
-    g_inputBinding:setActionEventTextVisibility(actionEventId, true)
-
-    self.activateActionEventId = actionEventId
-
-    -- Add our limit action (only for player on foot, not in vehicle)
-    if inputContext == PlayerInputComponent.INPUT_CONTEXT_NAME then
-        _, actionEventId = g_inputBinding:registerActionEvent(InputAction.RM_LIMIT_HUSBANDRY_ANIMALS, self,
-            self.actionEventLimitAnimals, false, true, false, true)
-
-        g_inputBinding:setActionEventText(actionEventId, g_i18n:getText("rm_lha_action_setLimit"))
-        g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_HIGH)
-        g_inputBinding:setActionEventTextVisibility(actionEventId, true)
-
-        self.limitAnimalsActionEventId = actionEventId
-    end
-end
-
---- Remove input actions when player leaves trigger
-function RmAnimalLoadingTriggerLimitActivatable:removeCustomInput(inputContext)
-    g_inputBinding:removeActionEventsByTarget(self)
-
-    self.activateActionEventId = nil
-    self.limitAnimalsActionEventId = nil
-end
-
---- Handle original activate action (opens animal screen)
-function RmAnimalLoadingTriggerLimitActivatable:actionEventActivate(actionName, inputValue, callbackState, isAnalog)
-    self:run()
-end
-
---- Handle our limit action (opens limit dialog)
-function RmAnimalLoadingTriggerLimitActivatable:actionEventLimitAnimals(actionName, inputValue, callbackState, isAnalog)
-    if self.owner == nil or self.owner.husbandry == nil then
-        InfoDialog.show(g_i18n:getText("rm_lha_error_notAvailable"))
-        return
-    end
-
-    local husbandry = self.owner.husbandry
-
-    -- Check permission (handles both SP and MP cases)
-    local canModify, errorKey = RmLimitHusbandryAnimals:canModifyLimit(husbandry)
-    if not canModify then
-        InfoDialog.show(g_i18n:getText(errorKey))
-        return
-    end
-
-    -- Show limit dialog
-    RmLimitHusbandryAnimals:showLimitDialog(husbandry)
 end

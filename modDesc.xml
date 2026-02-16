@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="100">
     <author>Ritter</author>
-    <version>0.2.1.0</version>
+    <version>0.2.2.0</version>
     <title>
         <en>Limit Husbandry Animals</en>
     </title>
@@ -29,6 +29,9 @@ Console Commands (advanced):
 - lhaReset <index>: Reset to original capacity
 
 Changelog:
+0.2.2.0:
+- Fixed compatibility with MoveHusbandryAnimals mod
+
 0.2.1.0:
 - Clarified multiplayer admin permissions (use console for cross-farm modifications)
 

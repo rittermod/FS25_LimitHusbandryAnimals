@@ -56,6 +56,9 @@ For changes without the dialog:
 
 ## Changelog
 
+### 0.2.2.0
+- Fixed compatibility with MoveHusbandryAnimals mod (both keybindings now work together)
+
 ### 0.2.1.0
 - Clarified multiplayer admin permissions (use console for cross-farm modifications)
 
