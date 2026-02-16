@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<modDesc descVersion="100">
+<modDesc descVersion="106">
     <author>Ritter</author>
-    <version>0.2.2.0</version>
+    <version>1.0.0.0</version>
     <title>
         <en>Limit Husbandry Animals</en>
     </title>
     <description>
         <en><![CDATA[
-Limit the maximum number of animals in husbandry pens, pastures, and buildings.
+Limit the maximum number of animals in husbandry pens, pastures, and buildings. Set custom limits through an easy-to-use dialog.
 
 Multiplayer support with permission system - admins can modify any pen (use console for other farms), farm managers can modify their farm's pens.
 
@@ -29,21 +29,12 @@ Console Commands (advanced):
 - lhaReset <index>: Reset to original capacity
 
 Changelog:
+1.0.0.0:
+- First stable release
+- Fixed activatable patching not registering basegame ACTIVATE_OBJECT action, which prevented opening the animal dialog
+
 0.2.2.0:
-- Fixed compatibility with MoveHusbandryAnimals mod
-
-0.2.1.0:
-- Clarified multiplayer admin permissions (use console for cross-farm modifications)
-
-0.2.0.0:
-- Added GUI dialog for setting limits
-- Direct number input with validation
-
-0.1.0.0:
-- First functional release
-- Console commands for limit management
-- Savegame persistence
-- Full multiplayer support
+- Fixed compatibility with MoveHusbandryAnimals mod (both keybindings now work together)
         ]]>        </en>
     </description>
 
