@@ -70,12 +70,12 @@ end
 function RmLimitSetDialog:applyAndClose()
     if self.inputDelay < self.time then
         if self.newLimit ~= self.currentLimit and self.husbandry ~= nil then
-            RmLogging.logInfo("RmLimitSetDialog: Setting limit to %d", self.newLimit)
+            Log:info("RmLimitSetDialog: Setting limit to %d", self.newLimit)
 
             if RmLimitHusbandryAnimalsSyncEvent ~= nil then
                 RmLimitHusbandryAnimalsSyncEvent.sendSetLimit(self.husbandry, self.newLimit)
             else
-                RmLogging.logError("RmLimitSetDialog: Sync event not available")
+                Log:error("RmLimitSetDialog: Sync event not available")
             end
         end
 
@@ -122,7 +122,7 @@ end
 function RmLimitSetDialog.show(husbandry, currentLimit, originalLimit, currentAnimals)
     local dialogEntry = g_gui.guis["RmLimitSetDialog"]
     if dialogEntry == nil or dialogEntry.target == nil then
-        RmLogging.logWarning("RmLimitSetDialog: Dialog not registered")
+        Log:warning("RmLimitSetDialog: Dialog not registered")
         return
     end
 
@@ -137,5 +137,5 @@ function RmLimitSetDialog.register()
 
     g_gui:loadGui(modDirectory .. "gui/RmLimitSetDialog.xml", "RmLimitSetDialog", dialog)
 
-    RmLogging.logInfo("RmLimitSetDialog registered")
+    Log:info("RmLimitSetDialog registered")
 end

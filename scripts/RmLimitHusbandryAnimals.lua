@@ -21,44 +21,10 @@ local CONSOLE_ERRORS = {
     rm_lha_error_unknown = "An unknown error occurred"
 }
 
--- Initialize logging (prefix updated in setLoggingContext after mission starts)
-RmLogging.setLogPrefix("[RmLimitHusbandryAnimals]")
---RmLogging.setLogLevel(RmLogging.LOG_LEVEL.DEBUG)
-
---- Detects server/client context and updates logging prefix accordingly
---- Called during initialization to distinguish between dedicated server, listen server, and client
-local function setLoggingContext()
-    local prefix = "[RmLimitHusbandryAnimals"
-    local contextName = ""
-
-    if g_dedicatedServer ~= nil then
-        prefix = prefix .. "|SERVER-DEDICATED]"
-        contextName = "Dedicated Server"
-    elseif g_server ~= nil and g_client ~= nil then
-        prefix = prefix .. "|SERVER-LISTEN]"
-        contextName = "Listen Server (Host)"
-    elseif g_client ~= nil and g_server == nil then
-        prefix = prefix .. "|CLIENT]"
-        contextName = "Pure Client"
-    else
-        prefix = prefix .. "|UNKNOWN]"
-        contextName = "Unknown (no g_server or g_client)"
-    end
-
-    RmLogging.setLogPrefix(prefix)
-    RmLogging.logInfo("Context detected: %s", contextName)
-
-    -- Debug: Log detection variables
-    RmLogging.logDebug("g_server=%s, g_client=%s, g_dedicatedServer=%s, isMultiplayer=%s",
-        tostring(g_server ~= nil),
-        tostring(g_client ~= nil),
-        tostring(g_dedicatedServer ~= nil),
-        tostring(g_currentMission.missionDynamicInfo.isMultiplayer))
-end
 
 --- Called when map is loaded
 function RmLimitHusbandryAnimals:loadMap()
-    RmLogging.logInfo("Mod loaded successfully (v%s)", g_modManager:getModByName(self.modName).version)
+    Log:info("Mod loaded successfully (v%s)", g_modManager:getModByName(self.modName).version)
 
     -- Register console commands
     addConsoleCommand("lhaList", "Lists all husbandries with current limits", "consoleCommandList", self)
@@ -68,10 +34,7 @@ end
 
 --- Called when mission starts (via hook) - placeables are populated at this point
 function RmLimitHusbandryAnimals.onMissionStarted()
-    -- Set logging context based on server/client role
-    setLoggingContext()
-
-    RmLogging.logInfo("Mission started, initializing...")
+    Log:info("Mission started, initializing...")
 
     -- Register GUI dialog
     RmLimitSetDialog.register()
@@ -115,7 +78,7 @@ function RmLimitHusbandryAnimals:ensureOriginalLimit(husbandry)
     local currentMax = spec.maxNumAnimals or spec.baseMaxNumAnimals or 0
     self.originalLimits[uniqueId] = currentMax
 
-    RmLogging.logDebug("Captured original limit %d for %s (lazy)", currentMax, husbandry:getName())
+    Log:debug("Captured original limit %d for %s (lazy)", currentMax, husbandry:getName())
 
     return currentMax
 end
@@ -210,7 +173,7 @@ function RmLimitHusbandryAnimals:applyAllLimits()
                 -- This ensures we know the true original for validation/reset
                 if self.originalLimits[uniqueId] == nil then
                     self.originalLimits[uniqueId] = spec.maxNumAnimals or spec.baseMaxNumAnimals or 0
-                    RmLogging.logDebug("Captured original limit %d for %s (before applying custom)",
+                    Log:debug("Captured original limit %d for %s (before applying custom)",
                         self.originalLimits[uniqueId], husbandry:getName())
                 end
 
@@ -221,7 +184,7 @@ function RmLimitHusbandryAnimals:applyAllLimits()
     end
 
     if applied > 0 then
-        RmLogging.logInfo("Applied %d custom limit(s)", applied)
+        Log:info("Applied %d custom limit(s)", applied)
     end
 end
 
@@ -248,7 +211,7 @@ function RmLimitHusbandryAnimals:setLimit(identifier, limit)
     spec.maxNumAnimals = limit
     self.customLimits[husbandry.uniqueId] = limit -- Always store by uniqueId for persistence
 
-    RmLogging.logInfo("Set limit for %s: %d -> %d", husbandry:getName(), oldLimit, limit)
+    Log:info("Set limit for %s: %d -> %d", husbandry:getName(), oldLimit, limit)
     return true, nil
 end
 
@@ -273,7 +236,7 @@ function RmLimitHusbandryAnimals:resetLimit(identifier)
     spec.maxNumAnimals = originalLimit
     self.customLimits[uniqueId] = nil -- Remove from custom limits
 
-    RmLogging.logInfo("Reset limit for %s: %d -> %d (original)", husbandry:getName(), oldLimit, originalLimit)
+    Log:info("Reset limit for %s: %d -> %d (original)", husbandry:getName(), oldLimit, originalLimit)
     return true, nil
 end
 
@@ -311,19 +274,19 @@ end
 function RmLimitHusbandryAnimals:loadFromSavegame()
     local savegameDir = g_currentMission.missionInfo.savegameDirectory
     if savegameDir == nil then
-        RmLogging.logDebug("No savegame directory (new game?)")
+        Log:debug("No savegame directory (new game?)")
         return
     end
 
     local xmlPath = savegameDir .. "/limitHusbandryAnimals.xml"
     if not fileExists(xmlPath) then
-        RmLogging.logDebug("No saved limits found")
+        Log:debug("No saved limits found")
         return
     end
 
     local xmlFile = loadXMLFile("limitHusbandryAnimals", xmlPath)
     if xmlFile == 0 then
-        RmLogging.logWarning("Failed to load limits file: %s", xmlPath)
+        Log:warning("Failed to load limits file: %s", xmlPath)
         return
     end
 
@@ -346,7 +309,7 @@ function RmLimitHusbandryAnimals:loadFromSavegame()
     end
 
     delete(xmlFile)
-    RmLogging.logInfo("Loaded %d custom limit(s) from savegame", i)
+    Log:info("Loaded %d custom limit(s) from savegame", i)
 end
 
 --- Save custom limits to savegame XML
@@ -355,7 +318,7 @@ function RmLimitHusbandryAnimals.saveToSavegame()
 
     local savegameDir = g_currentMission.missionInfo.savegameDirectory
     if savegameDir == nil then
-        RmLogging.logWarning("Cannot save: no savegame directory")
+        Log:warning("Cannot save: no savegame directory")
         return
     end
 
@@ -367,14 +330,14 @@ function RmLimitHusbandryAnimals.saveToSavegame()
         -- No custom limits, delete file if exists
         if fileExists(xmlPath) then
             deleteFile(xmlPath)
-            RmLogging.logDebug("Removed empty limits file")
+            Log:debug("Removed empty limits file")
         end
         return
     end
 
     local xmlFile = createXMLFile("limitHusbandryAnimals", xmlPath, "limitHusbandryAnimals")
     if xmlFile == 0 then
-        RmLogging.logWarning("Failed to create limits file: %s", xmlPath)
+        Log:warning("Failed to create limits file: %s", xmlPath)
         return
     end
 
@@ -388,7 +351,7 @@ function RmLimitHusbandryAnimals.saveToSavegame()
 
     saveXMLFile(xmlFile)
     delete(xmlFile)
-    RmLogging.logInfo("Saved %d custom limit(s) to savegame", count)
+    Log:info("Saved %d custom limit(s) to savegame", count)
 end
 
 --- Console command: List all husbandries with limits
@@ -403,7 +366,7 @@ function RmLimitHusbandryAnimals:consoleCommandList()
         return "No husbandries found"
     end
 
-    RmLogging.logInfo("=== Husbandry Animal Limits ===")
+    Log:info("=== Husbandry Animal Limits ===")
 
     for i, husbandry in ipairs(placeables) do
         local uniqueId = husbandry.uniqueId or "N/A"
@@ -419,9 +382,9 @@ function RmLimitHusbandryAnimals:consoleCommandList()
             customMarker = " [CUSTOM]"
         end
 
-        RmLogging.logInfo(string.format("#%d: %s (Farm %d)%s", i, name, ownerFarmId, customMarker))
-        RmLogging.logInfo(string.format("    Animals: %d / %d (original: %d)", currentAnimals, currentMax, originalMax))
-        RmLogging.logInfo(string.format("    UniqueId: %s", uniqueId))
+        Log:info(string.format("#%d: %s (Farm %d)%s", i, name, ownerFarmId, customMarker))
+        Log:info(string.format("    Animals: %d / %d (original: %d)", currentAnimals, currentMax, originalMax))
+        Log:info(string.format("    UniqueId: %s", uniqueId))
     end
 
     return string.format("Listed %d husbandries. Use 'lhaSet <index> <limit>' to set a limit.", #placeables)
@@ -439,25 +402,25 @@ function RmLimitHusbandryAnimals:consoleCommandSet(identifier, limitStr)
 
     local limit = tonumber(limitStr)
     if limit == nil then
-        RmLogging.logWarning("lhaSet: Invalid limit '%s' - must be a number", limitStr)
+        Log:warning("lhaSet: Invalid limit '%s' - must be a number", limitStr)
         return "Invalid limit: must be a number"
     end
 
     local husbandry = self:getHusbandryByIdentifier(identifier)
     if husbandry == nil then
-        RmLogging.logWarning("lhaSet: Husbandry not found for identifier '%s'", identifier)
+        Log:warning("lhaSet: Husbandry not found for identifier '%s'", identifier)
         return "Husbandry not found (use lhaList to see valid indexes)"
     end
 
     -- Check permission
     local canModify, errorKey = self:canModifyLimit(husbandry)
     if not canModify then
-        RmLogging.logWarning("lhaSet: Permission denied - %s", errorKey)
+        Log:warning("lhaSet: Permission denied - %s", errorKey)
         return "Error: " .. (CONSOLE_ERRORS[errorKey] or errorKey)
     end
 
     -- Use sync event for MP support (NetworkUtil handles object references)
-    RmLogging.logDebug("lhaSet: Requesting limit change for %s to %d", husbandry:getName(), limit)
+    Log:debug("lhaSet: Requesting limit change for %s to %d", husbandry:getName(), limit)
     RmLimitHusbandryAnimalsSyncEvent.sendSetLimit(husbandry, limit)
     return "Limit change requested..."
 end
@@ -470,19 +433,19 @@ function RmLimitHusbandryAnimals:consoleCommandReset(identifier)
 
     local husbandry = self:getHusbandryByIdentifier(identifier)
     if husbandry == nil then
-        RmLogging.logWarning("lhaReset: Husbandry not found for identifier '%s'", identifier)
+        Log:warning("lhaReset: Husbandry not found for identifier '%s'", identifier)
         return "Husbandry not found (use lhaList to see valid indexes)"
     end
 
     -- Check permission
     local canModify, errorKey = self:canModifyLimit(husbandry)
     if not canModify then
-        RmLogging.logWarning("lhaReset: Permission denied - %s", errorKey)
+        Log:warning("lhaReset: Permission denied - %s", errorKey)
         return "Error: " .. (CONSOLE_ERRORS[errorKey] or errorKey)
     end
 
     -- Use sync event for MP support (NetworkUtil handles object references)
-    RmLogging.logDebug("lhaReset: Requesting limit reset for %s", husbandry:getName())
+    Log:debug("lhaReset: Requesting limit reset for %s", husbandry:getName())
     RmLimitHusbandryAnimalsSyncEvent.sendResetLimit(husbandry)
     return "Limit reset requested..."
 end
@@ -495,7 +458,7 @@ function RmLimitHusbandryAnimals:logAllHusbandries()
     end
 
     local placeables = husbandrySystem.placeables
-    RmLogging.logInfo("Found %d husbandries", #placeables)
+    Log:info("Found %d husbandries", #placeables)
 
     for i, husbandry in ipairs(placeables) do
         local spec = husbandry.spec_husbandryAnimals
@@ -509,7 +472,7 @@ function RmLimitHusbandryAnimals:logAllHusbandries()
 
             local customMarker = self.customLimits[uniqueId] and " [CUSTOM]" or ""
 
-            RmLogging.logInfo("  #%d: %s (Farm %d) - %d/%d (orig: %d)%s",
+            Log:info("  #%d: %s (Farm %d) - %d/%d (orig: %d)%s",
                 i, name, ownerFarmId, currentAnimals, maxNumAnimals, originalMax, customMarker)
         end
     end
@@ -517,7 +480,7 @@ end
 
 --- Called when map is about to unload
 function RmLimitHusbandryAnimals:deleteMap()
-    RmLogging.logDebug("Mod unloading")
+    Log:debug("Mod unloading")
 
     -- Remove console commands
     removeConsoleCommand("lhaList")

@@ -132,19 +132,19 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
 
     if husbandry == nil then
         errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_NOT_FOUND
-        RmLogging.logWarning("Server received %s request but husbandry is nil", actionName)
+        Log:warning("Server received %s request but husbandry is nil", actionName)
     else
-        RmLogging.logDebug("Server received %s request for husbandry %s (newLimit=%d)",
+        Log:debug("Server received %s request for husbandry %s (newLimit=%d)",
             actionName, husbandry:getName(), self.newLimit)
         -- Get the requesting user (for admin check and name)
         local user = g_currentMission.userManager:getUserByConnection(connection)
         local player = g_currentMission:getPlayerByConnection(connection)
 
         if user == nil then
-            RmLogging.logWarning("Could not find user for connection")
+            Log:warning("Could not find user for connection")
             errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_UNKNOWN
         elseif player == nil then
-            RmLogging.logWarning("Could not find player for connection")
+            Log:warning("Could not find player for connection")
             errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_UNKNOWN
         else
             -- Debug: log user object details
@@ -154,11 +154,11 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
             local playerName = user:getNickname() or user.nickname or "Unknown"
             local playerFarmId = player.farmId
 
-            RmLogging.logDebug("User details: uniqueId=%s, numericId=%s, nickname=%s, playerFarmId=%s",
+            Log:debug("User details: uniqueId=%s, numericId=%s, nickname=%s, playerFarmId=%s",
                 tostring(userUniqueId), tostring(userId), tostring(playerName), tostring(playerFarmId))
 
             if playerFarmId == nil or playerFarmId == FarmManager.SPECTATOR_FARM_ID then
-                RmLogging.logWarning("Player %s has no farm or is spectator (farmId=%s)",
+                Log:warning("Player %s has no farm or is spectator (farmId=%s)",
                     playerName, tostring(playerFarmId))
                 errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_NOT_OWNER
             else
@@ -168,27 +168,27 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
                 -- Check admin FIRST (can modify ANY husbandry)
                 if user:getIsMasterUser() then
                     hasPermission = true
-                    RmLogging.logDebug("Player %s is admin (can modify any husbandry)", playerName)
+                    Log:debug("Player %s is admin (can modify any husbandry)", playerName)
                 end
 
                 -- Non-admin: check ownership
                 if not hasPermission then
                     if ownerFarmId ~= playerFarmId then
                         errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_NOT_OWNER
-                        RmLogging.logWarning("Player %s (farm %d) tried to modify husbandry owned by farm %d",
+                        Log:warning("Player %s (farm %d) tried to modify husbandry owned by farm %d",
                             playerName, playerFarmId, ownerFarmId)
                     else
                         -- Check if player is farm manager
                         local farm = g_farmManager:getFarmById(playerFarmId)
                         if farm ~= nil then
                             -- Debug: log farm manager info
-                            RmLogging.logDebug("Checking farm manager: farm=%s, userId=%s",
+                            Log:debug("Checking farm manager: farm=%s, userId=%s",
                                 farm.name or "Unknown", tostring(userId))
 
                             -- Log all farm managers for debugging
                             if farm.userIdToPlayer ~= nil then
                                 for farmUserId, farmPlayer in pairs(farm.userIdToPlayer) do
-                                    RmLogging.logDebug("  Farm user: id=%s, isFarmManager=%s",
+                                    Log:debug("  Farm user: id=%s, isFarmManager=%s",
                                         tostring(farmUserId), tostring(farm:isUserFarmManager(farmUserId)))
                                 end
                             end
@@ -196,17 +196,17 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
                             -- Use numeric userId for farm manager check
                             if farm:isUserFarmManager(userId) then
                                 hasPermission = true
-                                RmLogging.logDebug("Player %s is farm manager", playerName)
+                                Log:debug("Player %s is farm manager", playerName)
                             end
                         else
-                            RmLogging.logWarning("Farm not found for farmId=%d", playerFarmId)
+                            Log:warning("Farm not found for farmId=%d", playerFarmId)
                         end
                     end
                 end
 
                 if not hasPermission and errorCode == RmLimitHusbandryAnimalsSyncEvent.ERROR_UNKNOWN then
                     errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_NOT_MANAGER
-                    RmLogging.logWarning("Player %s is not admin or farm manager for farm %d",
+                    Log:warning("Player %s is not admin or farm manager for farm %d",
                         playerName, playerFarmId)
                 end
 
@@ -225,10 +225,10 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
                             appliedLimit = originalLimit
                             errorCode = RmLimitHusbandryAnimalsSyncEvent.RESULT_OK
 
-                            RmLogging.logInfo("MP: Reset limit for %s to %d (by %s)",
+                            Log:info("MP: Reset limit for %s to %d (by %s)",
                                 husbandry:getName(), originalLimit, playerName)
                         else
-                            RmLogging.logWarning("Original limit not found for %s", uniqueId)
+                            Log:warning("Original limit not found for %s", uniqueId)
                             errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_NOT_FOUND
                         end
                     else
@@ -236,7 +236,7 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
                         local valid, err = RmLimitHusbandryAnimals:validateLimit(husbandry, self.newLimit)
                         if not valid then
                             errorCode = RmLimitHusbandryAnimalsSyncEvent.ERROR_INVALID_LIMIT
-                            RmLogging.logWarning("Invalid limit %d for %s: %s",
+                            Log:warning("Invalid limit %d for %s: %s",
                                 self.newLimit, husbandry:getName(), err or "unknown")
                         else
                             local spec = husbandry.spec_husbandryAnimals
@@ -246,7 +246,7 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
                             appliedLimit = self.newLimit
                             errorCode = RmLimitHusbandryAnimalsSyncEvent.RESULT_OK
 
-                            RmLogging.logInfo("MP: Set limit for %s to %d (by %s)",
+                            Log:info("MP: Set limit for %s to %d (by %s)",
                                 husbandry:getName(), self.newLimit, playerName)
                         end
                     end
@@ -256,12 +256,12 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnServer(connection)
     end
 
     -- Send response back to requesting client
-    RmLogging.logDebug("Server sending response: errorCode=%d, appliedLimit=%d", errorCode, appliedLimit)
+    Log:debug("Server sending response: errorCode=%d, appliedLimit=%d", errorCode, appliedLimit)
     connection:sendEvent(RmLimitHusbandryAnimalsSyncEvent.newServerToClient(errorCode, husbandry, appliedLimit))
 
     -- If successful, broadcast to all OTHER clients so they update their local state
     if errorCode == RmLimitHusbandryAnimalsSyncEvent.RESULT_OK then
-        RmLogging.logDebug("Broadcasting success to other clients")
+        Log:debug("Broadcasting success to other clients")
         g_server:broadcastEvent(RmLimitHusbandryAnimalsSyncEvent.newServerToClient(errorCode, husbandry, appliedLimit),
             false, connection)
     end
@@ -272,7 +272,7 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnClient()
     local husbandry = self.husbandry
     local husbandryName = husbandry and husbandry:getName() or "Unknown"
 
-    RmLogging.logDebug(
+    Log:debug(
         "Client received response: errorCode=%d, husbandry=%s, appliedLimit=%d, originalLimit=%s, isSyncOriginal=%s",
         self.errorCode, husbandryName, self.appliedLimit,
         tostring(self.originalLimit), tostring(self.isSyncOriginal))
@@ -284,19 +284,19 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnClient()
 
             -- Ensure uniqueId is valid before using as table key
             if uniqueId == nil then
-                RmLogging.logWarning("Client: Husbandry %s has nil uniqueId", husbandryName)
+                Log:warning("Client: Husbandry %s has nil uniqueId", husbandryName)
                 return
             end
 
             -- Update original limit if provided
             if self.originalLimit ~= nil then
                 RmLimitHusbandryAnimals.originalLimits[uniqueId] = self.originalLimit
-                RmLogging.logDebug("MP: Stored original limit %d for %s", self.originalLimit, husbandryName)
+                Log:debug("MP: Stored original limit %d for %s", self.originalLimit, husbandryName)
             end
 
             -- If this is just syncing original limit, don't apply limit change or show notification
             if self.isSyncOriginal then
-                RmLogging.logDebug("MP: Received original limit sync for %s (orig=%d)", husbandryName,
+                Log:debug("MP: Received original limit sync for %s (orig=%d)", husbandryName,
                     self.originalLimit or 0)
                 return
             end
@@ -312,19 +312,19 @@ function RmLimitHusbandryAnimalsSyncEvent:runOnClient()
                 RmLimitHusbandryAnimals.customLimits[uniqueId] = self.appliedLimit
             end
 
-            RmLogging.logDebug("MP: Updated local limit for %s to %d", husbandryName, self.appliedLimit)
+            Log:debug("MP: Updated local limit for %s to %d", husbandryName, self.appliedLimit)
 
             -- Show success message
             g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_OK,
                 string.format(g_i18n:getText("rm_lha_mp_success"), husbandryName, self.appliedLimit))
         else
-            RmLogging.logWarning("Client: Husbandry not found in response")
+            Log:warning("Client: Husbandry not found in response")
         end
     else
         -- Show error message (only for actual limit change attempts, not sync)
         if not self.isSyncOriginal then
             local errorKey = self:getErrorMessageKey()
-            RmLogging.logWarning("Client received error: %s (code=%d)", errorKey, self.errorCode)
+            Log:warning("Client received error: %s (code=%d)", errorKey, self.errorCode)
             g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_CRITICAL,
                 g_i18n:getText(errorKey))
         end
@@ -352,11 +352,11 @@ end
 ---@param newLimit number New limit value
 function RmLimitHusbandryAnimalsSyncEvent.sendSetLimit(husbandry, newLimit)
     if husbandry == nil then
-        RmLogging.logWarning("sendSetLimit: husbandry is nil")
+        Log:warning("sendSetLimit: husbandry is nil")
         return
     end
 
-    RmLogging.logDebug("sendSetLimit called: husbandry=%s, newLimit=%d", husbandry:getName(), newLimit)
+    Log:debug("sendSetLimit called: husbandry=%s, newLimit=%d", husbandry:getName(), newLimit)
 
     local isMultiplayer = g_currentMission.missionDynamicInfo.isMultiplayer
     local isServer = g_currentMission:getIsServer()
@@ -364,7 +364,7 @@ function RmLimitHusbandryAnimalsSyncEvent.sendSetLimit(husbandry, newLimit)
     -- In SP or as server/host: apply directly. As MP client: send to server
     if not isMultiplayer or isServer then
         -- Single player or server/host can apply directly
-        RmLogging.logDebug("Applying SET directly (isMultiplayer=%s, isServer=%s)", tostring(isMultiplayer),
+        Log:debug("Applying SET directly (isMultiplayer=%s, isServer=%s)", tostring(isMultiplayer),
             tostring(isServer))
         local valid, err = RmLimitHusbandryAnimals:validateLimit(husbandry, newLimit)
         if valid then
@@ -373,7 +373,7 @@ function RmLimitHusbandryAnimalsSyncEvent.sendSetLimit(husbandry, newLimit)
             spec.maxNumAnimals = newLimit
             RmLimitHusbandryAnimals.customLimits[uniqueId] = newLimit
 
-            RmLogging.logInfo("Set limit for %s to %d", husbandry:getName(), newLimit)
+            Log:info("Set limit for %s to %d", husbandry:getName(), newLimit)
 
             -- Broadcast to all clients (only if MP)
             if isMultiplayer then
@@ -387,13 +387,13 @@ function RmLimitHusbandryAnimalsSyncEvent.sendSetLimit(husbandry, newLimit)
             g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_OK,
                 string.format(g_i18n:getText("rm_lha_mp_success"), husbandry:getName(), newLimit))
         else
-            RmLogging.logWarning("Invalid limit %d for %s: %s", newLimit, husbandry:getName(), err or "unknown")
+            Log:warning("Invalid limit %d for %s: %s", newLimit, husbandry:getName(), err or "unknown")
             g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_CRITICAL,
                 g_i18n:getText("rm_lha_error_invalidLimit"))
         end
     else
         -- Multiplayer client: send request to server using NetworkUtil
-        RmLogging.logDebug("Client sending SET request to server")
+        Log:debug("Client sending SET request to server")
         g_client:getServerConnection():sendEvent(
             RmLimitHusbandryAnimalsSyncEvent.new(husbandry, newLimit, RmLimitHusbandryAnimalsSyncEvent.ACTION_SET_LIMIT)
         )
@@ -404,11 +404,11 @@ end
 ---@param husbandry table The husbandry placeable object
 function RmLimitHusbandryAnimalsSyncEvent.sendResetLimit(husbandry)
     if husbandry == nil then
-        RmLogging.logWarning("sendResetLimit: husbandry is nil")
+        Log:warning("sendResetLimit: husbandry is nil")
         return
     end
 
-    RmLogging.logDebug("sendResetLimit called: husbandry=%s", husbandry:getName())
+    Log:debug("sendResetLimit called: husbandry=%s", husbandry:getName())
 
     local isMultiplayer = g_currentMission.missionDynamicInfo.isMultiplayer
     local isServer = g_currentMission:getIsServer()
@@ -416,7 +416,7 @@ function RmLimitHusbandryAnimalsSyncEvent.sendResetLimit(husbandry)
     -- In SP or as server/host: apply directly. As MP client: send to server
     if not isMultiplayer or isServer then
         -- Single player or server/host can apply directly
-        RmLogging.logDebug("Applying RESET directly (isMultiplayer=%s, isServer=%s)", tostring(isMultiplayer),
+        Log:debug("Applying RESET directly (isMultiplayer=%s, isServer=%s)", tostring(isMultiplayer),
             tostring(isServer))
         local uniqueId = husbandry.uniqueId
         local originalLimit = RmLimitHusbandryAnimals.originalLimits[uniqueId]
@@ -425,7 +425,7 @@ function RmLimitHusbandryAnimalsSyncEvent.sendResetLimit(husbandry)
             spec.maxNumAnimals = originalLimit
             RmLimitHusbandryAnimals.customLimits[uniqueId] = nil
 
-            RmLogging.logInfo("Reset limit for %s to %d (original)", husbandry:getName(), originalLimit)
+            Log:info("Reset limit for %s to %d (original)", husbandry:getName(), originalLimit)
 
             -- Broadcast to all clients (only if MP)
             if isMultiplayer then
@@ -439,11 +439,11 @@ function RmLimitHusbandryAnimalsSyncEvent.sendResetLimit(husbandry)
             g_currentMission:addIngameNotification(FSBaseMission.INGAME_NOTIFICATION_OK,
                 string.format(g_i18n:getText("rm_lha_mp_success"), husbandry:getName(), originalLimit))
         else
-            RmLogging.logWarning("Original limit not found for %s", uniqueId)
+            Log:warning("Original limit not found for %s", uniqueId)
         end
     else
         -- Multiplayer client: send request to server using NetworkUtil
-        RmLogging.logDebug("Client sending RESET request to server")
+        Log:debug("Client sending RESET request to server")
         g_client:getServerConnection():sendEvent(
             RmLimitHusbandryAnimalsSyncEvent.new(husbandry, 0, RmLimitHusbandryAnimalsSyncEvent.ACTION_RESET_LIMIT)
         )

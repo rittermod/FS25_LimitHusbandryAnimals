@@ -5,7 +5,8 @@ local modName = g_currentModName
 local modDirectory = g_currentModDirectory
 
 -- Load dependencies
-source(modDirectory .. "scripts/RmLogging.lua")
+source(modDirectory .. "scripts/rmlib/RmLogging.lua")
+Log = RmLogging.getLogger("LimitHusbandryAnimals")
 source(modDirectory .. "scripts/RmLimitHusbandryAnimals.lua")
 source(modDirectory .. "scripts/events/RmLimitHusbandryAnimalsSyncEvent.lua")
 source(modDirectory .. "scripts/gui/RmLimitSetDialog.lua")
@@ -28,7 +29,7 @@ local function validateTypes(typeManager)
             end
 
             if numInserted > 0 then
-                RmLogging.logInfo("Injected specialization into %d placeable types", numInserted)
+                Log:info("Injected specialization into %d placeable types", numInserted)
             end
         end
     end

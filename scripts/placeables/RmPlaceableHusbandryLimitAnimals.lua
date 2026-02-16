@@ -74,7 +74,7 @@ function RmPlaceableHusbandryLimitAnimals:onPostLoad(savegame)
             activatable.rmHusbandry = self
 
             self[RmPlaceableHusbandryLimitAnimals.SPEC_TABLE_NAME].activatablePatched = true
-            RmLogging.logDebug("Patched activatable for %s (preserves other mods)", self:getName())
+            Log:debug("Patched activatable for %s (preserves other mods)", self:getName())
         end
     end
 end
@@ -122,7 +122,7 @@ function RmPlaceableHusbandryLimitAnimals:onHusbandryAnimalsCreated(husbandryId)
 
         -- Don't update if custom limit is set (preserve original for validation/reset)
         if hasCustomLimit then
-            RmLogging.logDebug(
+            Log:debug(
                 "onHusbandryAnimalsCreated: %s (maxNumAnimals=%d) - keeping original %d (has custom limit)",
                 self:getName(), currentMax, previousOriginal or 0)
             return
@@ -132,10 +132,10 @@ function RmPlaceableHusbandryLimitAnimals:onHusbandryAnimalsCreated(husbandryId)
         RmLimitHusbandryAnimals.originalLimits[uniqueId] = currentMax
 
         if previousOriginal ~= nil and previousOriginal ~= currentMax then
-            RmLogging.logDebug("onHusbandryAnimalsCreated: %s updated original %d -> %d (fence area changed)",
+            Log:debug("onHusbandryAnimalsCreated: %s updated original %d -> %d (fence area changed)",
                 self:getName(), previousOriginal, currentMax)
         else
-            RmLogging.logDebug("onHusbandryAnimalsCreated: %s captured original limit %d",
+            Log:debug("onHusbandryAnimalsCreated: %s captured original limit %d",
                 self:getName(), currentMax)
         end
     end
@@ -155,7 +155,7 @@ function RmPlaceableHusbandryLimitAnimals:onDelete()
         RmLimitHusbandryAnimals.originalLimits[uniqueId] = nil
 
         if hadCustomLimit or hadOriginalLimit then
-            RmLogging.logDebug("Cleaned up limits for deleted husbandry: %s", self:getName() or uniqueId)
+            Log:debug("Cleaned up limits for deleted husbandry: %s", self:getName() or uniqueId)
         end
     end
 end
@@ -172,13 +172,13 @@ function RmPlaceableHusbandryLimitAnimals:onWriteStream(streamId, connection)
     -- Send original limit (may be nil for new pens where nav mesh hasn't loaded yet)
     if streamWriteBool(streamId, originalLimit ~= nil) then
         streamWriteInt32(streamId, originalLimit)
-        RmLogging.logDebug("WriteStream: Sending original limit %d for %s", originalLimit, self:getName())
+        Log:debug("WriteStream: Sending original limit %d for %s", originalLimit, self:getName())
     end
 
     -- Send custom limit
     if streamWriteBool(streamId, customLimit ~= nil) then
         streamWriteInt32(streamId, customLimit)
-        RmLogging.logDebug("WriteStream: Sending custom limit %d for %s", customLimit, self:getName())
+        Log:debug("WriteStream: Sending custom limit %d for %s", customLimit, self:getName())
     end
 end
 
@@ -195,7 +195,7 @@ function RmPlaceableHusbandryLimitAnimals:onReadStream(streamId, connection)
         local originalLimit = streamReadInt32(streamId)
         if uniqueId ~= nil then
             RmLimitHusbandryAnimals.originalLimits[uniqueId] = originalLimit
-            RmLogging.logDebug("ReadStream: Received original limit %d for %s", originalLimit, self:getName())
+            Log:debug("ReadStream: Received original limit %d for %s", originalLimit, self:getName())
         end
     end
 
@@ -205,7 +205,7 @@ function RmPlaceableHusbandryLimitAnimals:onReadStream(streamId, connection)
         if spec ~= nil and uniqueId ~= nil then
             spec.maxNumAnimals = customLimit
             RmLimitHusbandryAnimals.customLimits[uniqueId] = customLimit
-            RmLogging.logDebug("ReadStream: Applied custom limit %d for %s", customLimit, self:getName())
+            Log:debug("ReadStream: Applied custom limit %d for %s", customLimit, self:getName())
         end
     end
 end
