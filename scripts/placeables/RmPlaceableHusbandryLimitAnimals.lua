@@ -38,10 +38,23 @@ function RmPlaceableHusbandryLimitAnimals:onPostLoad(savegame)
             local origRemove = activatable.removeCustomInput
 
             -- Wrap registerCustomInput to add our keybinding while preserving other mods' keybindings
+            -- NOTE: By defining registerCustomInput, we tell ActivatableObjectsSystem that we handle
+            -- ALL input registration — it will NOT auto-register ACTIVATE_OBJECT ("R").
             activatable.registerCustomInput = function(act, inputContext)
-                -- Call original first (preserves other mods' keybindings)
                 if origRegister then
+                    -- Other mod (e.g. MoveHusbandryAnimals) handles ACTIVATE_OBJECT + its own actions
                     origRegister(act, inputContext)
+                else
+                    -- Basegame has no registerCustomInput, so we must register ACTIVATE_OBJECT ourselves
+                    local _, actionEventId = g_inputBinding:registerActionEvent(
+                        InputAction.ACTIVATE_OBJECT,
+                        act,
+                        RmPlaceableHusbandryLimitAnimals.actionEventActivate,
+                        false, true, false, true)
+                    g_inputBinding:setActionEventText(actionEventId, act.activateText)
+                    g_inputBinding:setActionEventTextPriority(actionEventId, GS_PRIO_VERY_HIGH)
+                    g_inputBinding:setActionEventTextVisibility(actionEventId, true)
+                    act.rmActivateActionEventId = actionEventId
                 end
                 -- Add our limit keybinding (player on foot only)
                 if inputContext == PlayerInputComponent.INPUT_CONTEXT_NAME then
@@ -58,12 +71,15 @@ function RmPlaceableHusbandryLimitAnimals:onPostLoad(savegame)
             end
 
             -- Wrap removeCustomInput to clean up our keybinding
-            activatable.removeCustomInput = function(act, inputContext)
-                -- Call original first
+            activatable.removeCustomInput = function(act)
                 if origRemove then
-                    origRemove(act, inputContext)
+                    origRemove(act)
+                else
+                    if act.rmActivateActionEventId then
+                        g_inputBinding:removeActionEvent(act.rmActivateActionEventId)
+                        act.rmActivateActionEventId = nil
+                    end
                 end
-                -- Remove our keybinding
                 if act.rmLimitAnimalsActionEventId then
                     g_inputBinding:removeActionEvent(act.rmLimitAnimalsActionEventId)
                     act.rmLimitAnimalsActionEventId = nil
@@ -77,6 +93,11 @@ function RmPlaceableHusbandryLimitAnimals:onPostLoad(savegame)
             Log:debug("Patched activatable for %s (preserves other mods)", self:getName())
         end
     end
+end
+
+--- Handle activate action event (opens animal screen)
+function RmPlaceableHusbandryLimitAnimals.actionEventActivate(activatable)
+    activatable:run()
 end
 
 --- Handle limit action event (static function called with activatable as first arg)
