@@ -8,8 +8,8 @@ Multiplayer support with permission system - admins can modify any pen, farm man
 
 - **Easy Limit Dialog:** Press L at any animal trigger to open the limit setter
 - **Direct Input:** Type your desired limit - bounds shown, validation automatic
-- **Custom Limits:** Set maximum animal counts per pen/building/pasture
-- **Validation:** Cannot exceed original capacity or go below current animals
+- **Custom Limits:** Set maximum animal counts per pen/building/pasture, or increase beyond default capacity
+- **Validation:** Cannot go below current animal count
 - **Savegame Persistence:** Limits saved per-savegame
 - **Multiplayer Support:** Server validation, client sync, permission system
 - **Console Commands:** lhaList, lhaSet, lhaReset for advanced users
@@ -53,12 +53,11 @@ For changes without the dialog:
 
 ## Changelog
 
+### 1.0.1.0
+- Limits can now exceed default pen capacity, allowing more animals than the original maximum
+
 ### 1.0.0.0
 - First stable release
-- Fixed activatable patching not registering basegame ACTIVATE_OBJECT action, which prevented opening the animal dialog
-
-### 0.2.2.0
-- Fixed compatibility with MoveHusbandryAnimals mod (both keybindings now work together)
 
 See [CHANGELOG.md](CHANGELOG.md) for full version history.
 

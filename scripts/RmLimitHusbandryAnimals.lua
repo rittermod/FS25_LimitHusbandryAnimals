@@ -9,6 +9,7 @@ RmLimitHusbandryAnimals.modName = g_currentModName
 
 -- Storage for limits
 -- Key = uniqueId, Value = limit
+RmLimitHusbandryAnimals.MAX_LIMIT = 9999    -- Absolute upper bound for animal capacity
 RmLimitHusbandryAnimals.customLimits = {}   -- User-configured limits (persisted to savegame)
 RmLimitHusbandryAnimals.originalLimits = {} -- Original limits captured on first load (for validation)
 
@@ -92,14 +93,14 @@ function RmLimitHusbandryAnimals:validateLimit(husbandry, newLimit)
     local currentAnimals = husbandry:getNumOfAnimals() or 0
 
     -- Ensure original limit is captured (lazy capture)
-    local originalMax = self:ensureOriginalLimit(husbandry)
+    self:ensureOriginalLimit(husbandry)
 
     if newLimit < currentAnimals then
         return false, string.format("Limit (%d) cannot be lower than current animals (%d)", newLimit, currentAnimals)
     end
 
-    if newLimit > originalMax then
-        return false, string.format("Limit (%d) cannot exceed original capacity (%d)", newLimit, originalMax)
+    if newLimit > self.MAX_LIMIT then
+        return false, string.format("Limit (%d) cannot exceed maximum (%d)", newLimit, self.MAX_LIMIT)
     end
 
     return true, nil

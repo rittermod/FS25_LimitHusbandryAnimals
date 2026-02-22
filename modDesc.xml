@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <modDesc descVersion="106">
     <author>Ritter</author>
-    <version>1.0.0.0</version>
+    <version>1.0.1.0</version>
     <title>
         <en>Limit Husbandry Animals</en>
     </title>
@@ -14,6 +14,7 @@ Multiplayer support with permission system - admins can modify any pen (use cons
 Features:
 - Easy limit dialog: Press L at any animal trigger to set limits
 - Direct number input with automatic validation
+- Set limits per pen, or increase beyond default capacity
 - Limits persist across save/load
 - Multiplayer support with permission system
 - Console commands available for advanced users
@@ -29,12 +30,11 @@ Console Commands (advanced):
 - lhaReset <index>: Reset to original capacity
 
 Changelog:
+1.0.1.0:
+- Limits can now exceed default pen capacity, allowing more animals than the original maximum
+
 1.0.0.0:
 - First stable release
-- Fixed activatable patching not registering basegame ACTIVATE_OBJECT action, which prevented opening the animal dialog
-
-0.2.2.0:
-- Fixed compatibility with MoveHusbandryAnimals mod (both keybindings now work together)
         ]]>        </en>
     </description>
 

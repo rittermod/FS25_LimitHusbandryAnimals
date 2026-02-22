@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.1.0
+- Limits can now exceed default pen capacity, allowing more animals than the original maximum
+
 ## 1.0.0.0
 - First stable release
 - Fixed activatable patching not registering basegame ACTIVATE_OBJECT action, which prevented opening the animal dialog

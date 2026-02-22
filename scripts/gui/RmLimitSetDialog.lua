@@ -40,8 +40,8 @@ function RmLimitSetDialog:onTextChanged(element, text)
         -- Clamp to bounds
         if value < self.minLimit then
             value = self.minLimit
-        elseif value > self.originalLimit then
-            value = self.originalLimit
+        elseif value > RmLimitHusbandryAnimals.MAX_LIMIT then
+            value = RmLimitHusbandryAnimals.MAX_LIMIT
         end
         self.newLimit = value
     end

@@ -20,6 +20,6 @@
 
         <!-- Limit dialog -->
         <text name="rm_lha_dialog_title" text="Set Animal Limit"/>
-        <text name="rm_lha_dialog_bounds" text="Min: %d / Max: %d"/>
+        <text name="rm_lha_dialog_bounds" text="Min: %d / Default: %d"/>
     </texts>
 </l10n>
